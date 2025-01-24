@@ -1,0 +1,11 @@
+{
+    "mirror": {
+        "message": "거울"
+    },
+    "speed": {
+        "message": "재생속도"
+    },
+    "loop": {
+        "message": "연속재생"
+    }
+}

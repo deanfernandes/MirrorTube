@@ -1,0 +1,11 @@
+{
+    "mirror": {
+        "message": "Espelhada"
+    },
+    "speed": {
+        "message": "Velocidade de reprodução"
+    },
+    "loop": {
+        "message": "Repetir"
+    }
+}

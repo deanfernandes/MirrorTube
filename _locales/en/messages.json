@@ -1,0 +1,11 @@
+{
+    "mirror": {
+        "message": "Mirror"
+    },
+    "speed": {
+        "message": "Speed"
+    },
+    "loop": {
+        "message": "Loop"
+    }
+}
