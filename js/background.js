@@ -24,8 +24,6 @@ chrome.runtime.onInstalled.addListener((details) => {
         target: { tabId: tab.id },
         files: ["css/mirror.css"],
       });
-
-      console.log(`injected ${tab.url}`);
     });
   });
 });

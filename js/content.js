@@ -1,12 +1,15 @@
 var loop = {
   checked: false,
   startTime: 0,
-  endTime: 0
+  endTime: 0,
 };
 
+const video = document.querySelector(".html5-main-video");
+const vid = document.querySelector("video");
+
 function onTimeUpdate() {
-  if (document.querySelector('video').currentTime >= loop.endTime || document.querySelector('video').currentTime < loop.startTime) {
-    document.querySelector('video').currentTime = loop.startTime;
+  if (vid.currentTime >= loop.endTime || vid.currentTime < loop.startTime) {
+    vid.currentTime = loop.startTime;
   }
 }
 
@@ -14,73 +17,67 @@ function formatTimestamp(timestampInSeconds) {
   const minutes = Math.floor(timestampInSeconds / 60);
   const seconds = timestampInSeconds % 60;
 
-  const formattedMinutes = minutes > 0 ? String(minutes) : '0';
-  const formattedSeconds = String(seconds).padStart(2, '0');
+  const formattedMinutes = minutes > 0 ? String(minutes) : "0";
+  const formattedSeconds = String(seconds).padStart(2, "0");
 
   return `${formattedMinutes}:${formattedSeconds}`;
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if(message.type == 'mirrorInput') {
-    if (message.method == 'get') {
-      sendResponse({ checked: document.getElementsByClassName('html5-main-video')[0].classList.contains('mirrored') });
-    }
-    else if (message.method == 'set') {
-      if(message.checked) {
-        document.getElementsByClassName('html5-main-video')[0].classList.add('mirrored');
+  switch (message.type) {
+    case "mirrorInput": {
+      if (message.method == "get") {
+        sendResponse({ checked: video.classList.contains("mirrored") });
+      } else if (message.method == "set") {
+        message.checked
+          ? video.classList.add("mirrored")
+          : video.classList.remove("mirrored");
       }
-      else {
-        document.getElementsByClassName('html5-main-video')[0].classList.remove('mirrored');
+      break;
+    }
+    case "speedInput": {
+      if (message.method == "get") {
+        sendResponse({ value: vid.playbackRate });
+      } else if (message.method == "set") {
+        vid.playbackRate = message.value;
       }
-    }
-  }
-  else if(message.type == 'speedInput') {
-    if (message.method == 'get') {
-      const video = document.querySelector('video');
-      sendResponse({ value: video.playbackRate });
-    }
-    else if (message.method == 'set') {
-      const video = document.querySelector('video');
-      video.playbackRate = message.value;   
-    }
-  }
-  else if(message.type == 'loopInput') {
-    if (message.method == 'get') {
-      sendResponse({ checked: loop.checked });
-    }
-    else if (message.method == 'set') {
-      loop.checked = message.checked;
 
-      if(message.checked) {
-        loop.checked = true;
-
-        document.querySelector('video').addEventListener('timeupdate', onTimeUpdate);
+      break;
+    }
+    case "loopInput": {
+      if (message.method == "get") {
+        sendResponse({ checked: loop.checked });
+      } else if (message.method == "set") {
+        message.checked
+          ? vid.addEventListener("timeupdate", onTimeUpdate)
+          : vid.removeEventListener("timeupdate", onTimeUpdate);
+        loop.checked = message.checked;
       }
-      else {
-        loop.checked = false;
+      break;
+    }
+    case "startTimeButton": {
+      if (message.method == "get") {
+        sendResponse({ value: formatTimestamp(loop.startTime) });
+      } else if (message.method == "set") {
+        loop.startTime = Math.floor(vid.currentTime);
 
-        document.querySelector('video').removeEventListener('timeupdate', onTimeUpdate);
+        sendResponse({ value: formatTimestamp(loop.startTime) });
       }
+      break;
     }
-  }
-  else if(message.type == 'startTimeButton') {
-    if(message.method == 'get') {
-      sendResponse({ value: formatTimestamp(loop.startTime) });
-    }
-    else if (message.method == 'set'){
-      loop.startTime = Math.floor(document.querySelector('video').currentTime);
+    case "endTimeButton": {
+      if (message.method == "get") {
+        sendResponse({ value: formatTimestamp(loop.endTime) });
+      } else if (message.method == "set") {
+        loop.endTime = Math.floor(vid.currentTime);
 
-      sendResponse({ value: formatTimestamp(loop.startTime) });
+        sendResponse({ value: formatTimestamp(loop.endTime) });
+      }
+      break;
     }
-  }
-  else if(message.type == 'endTimeButton') {
-    if(message.method == 'get') {
-      sendResponse({ value: formatTimestamp(loop.endTime) });
-    }
-    else if (message.method == 'set'){
-      loop.endTime = Math.floor(document.querySelector('video').currentTime);
-
-      sendResponse({ value: formatTimestamp(loop.endTime) });
+    default: {
+      console.error("Unknown message type");
+      break;
     }
   }
 });

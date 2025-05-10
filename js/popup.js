@@ -1,92 +1,131 @@
-document.addEventListener('DOMContentLoaded', () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, { type : 'mirrorInput', method: 'get' }, (response) => {
-            document.getElementById('mirrorInput').checked = response.checked;
-        });
+let mirrorInput = document.getElementById("mirrorInput");
+let speedInput = document.getElementById("speedInput");
+let speedInputValue = document.getElementById("speedInputValue");
+let loopInput = document.getElementById("loopInput");
+let startTimeButton = document.getElementById("startTimeButton");
+let endTimeButton = document.getElementById("endTimeButton");
 
-        chrome.tabs.sendMessage(tabs[0].id, { type : 'speedInput', method: 'get' }, (response) => {
-            document.getElementById('speedInput').value = response.value;
+chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+  chrome.tabs.sendMessage(
+    tabs[0].id,
+    { type: "mirrorInput", method: "get" },
+    (response) => {
+      mirrorInput.checked = response.checked;
+    }
+  );
 
-            document.getElementById("speedInputValue").textContent = response.value;
-        });
+  chrome.tabs.sendMessage(
+    tabs[0].id,
+    { type: "speedInput", method: "get" },
+    (response) => {
+      speedInput.value = response.value;
 
-        chrome.tabs.sendMessage(tabs[0].id, { type : 'loopInput', method: 'get' }, (response) => {
-            document.getElementById('loopInput').checked = response.checked;
+      speedInputValue.textContent = response.value;
+    }
+  );
 
-            if(response.checked) {
-                document.getElementById('startTimeButton').disabled = true;
-                document.getElementById('endTimeButton').disabled = true;
-            }
-            else {
-                document.getElementById('startTimeButton').disabled = false;
-                document.getElementById('endTimeButton').disabled = false;
-            }
-        });
+  chrome.tabs.sendMessage(
+    tabs[0].id,
+    { type: "loopInput", method: "get" },
+    (response) => {
+      loopInput.checked = response.checked;
 
-        chrome.tabs.sendMessage(tabs[0].id, { type : 'startTimeButton', method: 'get' }, (response) => {
-            document.getElementById('startTimeButton').value = response.value;
-        });
+      if (response.checked) {
+        startTimeButton.disabled = true;
+        endTimeButton.disabled = true;
+      } else {
+        startTimeButton.disabled = false;
+        endTimeButton.disabled = false;
+      }
+    }
+  );
 
-        chrome.tabs.sendMessage(tabs[0].id, { type : 'endTimeButton', method: 'get' }, (response) => {
-            document.getElementById('endTimeButton').value = response.value;
+  chrome.tabs.sendMessage(
+    tabs[0].id,
+    { type: "startTimeButton", method: "get" },
+    (response) => {
+      startTimeButton.value = response.value;
+    }
+  );
 
-            if(document.getElementById('endTimeButton').value == '0:00') {
-                document.getElementById('loopInput').disabled = true;
-            }
-            else {
-                document.getElementById('loopInput').disabled = false;
-            }
-        });
+  chrome.tabs.sendMessage(
+    tabs[0].id,
+    { type: "endTimeButton", method: "get" },
+    (response) => {
+      endTimeButton.value = response.value;
 
-        document.getElementById('mirrorInput').addEventListener('change', () => {
-            chrome.tabs.sendMessage(tabs[0].id, { type : 'mirrorInput', method: 'set', checked: document.getElementById('mirrorInput').checked });
-        });
+      if (endTimeButton.value == "0:00") {
+        loopInput.disabled = true;
+      } else {
+        loopInput.disabled = false;
+      }
+    }
+  );
 
-        document.getElementById('speedInput').addEventListener('input', () => {
-            console.log("change");
-            document.getElementById('speedInputValue').textContent = document.getElementById('speedInput').value;
+  mirrorInput.addEventListener("change", (e) => {
+    chrome.tabs.sendMessage(tabs[0].id, {
+      type: "mirrorInput",
+      method: "set",
+      checked: e.target.checked,
+    });
+  });
 
-            chrome.tabs.sendMessage(tabs[0].id, { type : 'speedInput', method: 'set', value: document.getElementById('speedInput').value });
-        });
+  speedInput.addEventListener("input", (e) => {
+    chrome.tabs.sendMessage(tabs[0].id, {
+      type: "speedInput",
+      method: "set",
+      value: e.target.value,
+    });
+    speedInputValue.textContent = e.target.value;
+  });
 
-        document.getElementById('loopInput').addEventListener('change', () => {
-            chrome.tabs.sendMessage(tabs[0].id, { type : 'loopInput', method: 'set', checked: document.getElementById('loopInput').checked});
-
-            if(document.getElementById('loopInput').checked) {
-                document.getElementById('startTimeButton').disabled = true;
-                document.getElementById('endTimeButton').disabled = true;
-            }
-            else {
-                document.getElementById('startTimeButton').disabled = false;
-                document.getElementById('endTimeButton').disabled = false;
-            }
-        });
-
-        document.getElementById('startTimeButton').addEventListener('click', () => {
-            chrome.tabs.sendMessage(tabs[0].id, { type : 'startTimeButton', method: 'set' }, (response) => {
-                document.getElementById('startTimeButton').value = response.value;
-            });
-        });
-
-        document.getElementById('endTimeButton').addEventListener('click', () => {
-            chrome.tabs.sendMessage(tabs[0].id, { type : 'endTimeButton', method: 'set' }, (response) => {
-                document.getElementById('endTimeButton').value = response.value;
-
-                if(document.getElementById('endTimeButton').value == '0:00') {
-                    document.getElementById('loopInput').disabled = true;
-                }
-                else {
-                    document.getElementById('loopInput').disabled = false;
-                }
-            });
-        });
+  loopInput.addEventListener("change", (e) => {
+    chrome.tabs.sendMessage(tabs[0].id, {
+      type: "loopInput",
+      method: "set",
+      checked: e.target.checked,
     });
 
-    document.querySelectorAll('[data-i18n]').forEach(elem => {
-        const messageKey = elem.getAttribute('data-i18n');
-        const localizedMessage = chrome.i18n.getMessage(messageKey);
-        if (localizedMessage) {
-            elem.textContent = localizedMessage;
+    if (loopInput.checked) {
+      startTimeButton.disabled = true;
+      endTimeButton.disabled = true;
+    } else {
+      startTimeButton.disabled = false;
+      endTimeButton.disabled = false;
+    }
+  });
+
+  startTimeButton.addEventListener("click", (e) => {
+    chrome.tabs.sendMessage(
+      tabs[0].id,
+      { type: "startTimeButton", method: "set" },
+      (response) => {
+        e.target.value = response.value;
+      }
+    );
+  });
+
+  endTimeButton.addEventListener("click", (e) => {
+    chrome.tabs.sendMessage(
+      tabs[0].id,
+      { type: "endTimeButton", method: "set" },
+      (response) => {
+        e.target.value = response.value;
+
+        if (endTimeButton.value == "0:00") {
+          loopInput.disabled = true;
+        } else {
+          loopInput.disabled = false;
         }
-    });
+      }
+    );
+  });
+});
+
+document.querySelectorAll("[data-i18n]").forEach((elem) => {
+  const messageKey = elem.getAttribute("data-i18n");
+  const localizedMessage = chrome.i18n.getMessage(messageKey);
+  if (localizedMessage) {
+    elem.textContent = localizedMessage;
+  }
 });
