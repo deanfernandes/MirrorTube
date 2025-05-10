@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "MirrorTube",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "default_locale": "en",
   "permissions": ["tabs", "scripting"],
   "host_permissions": ["https://*.youtube.com/*"],
